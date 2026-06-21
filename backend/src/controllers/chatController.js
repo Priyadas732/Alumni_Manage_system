@@ -2,11 +2,11 @@ import prisma from '../db.js';
 
 // 1. Start or Fetch a 1-on-1 Conversation
 export const startConversation = async (req, res) => {
-    const { recipientId } = req.body;
+    const recipientId = req.body.recipientId || req.body.participantId;
     const senderId = req.user.id;
 
     if (!recipientId) {
-        return res.status(400).json({ success: false, message: "Recipient ID is required" });
+        return res.status(400).json({ success: false, message: "Recipient ID or Participant ID is required" });
     }
 
     if (senderId === recipientId) {

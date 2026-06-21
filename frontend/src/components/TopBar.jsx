@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default function TopBar({ onMenuClick, title = "AlumniConnect", showSearch = true, searchPlaceholder = "Search..." }) {
+export default function TopBar({ onMenuClick, title = "AlumniConnect", showSearch = true, searchPlaceholder = "Search...", searchValue = "", onSearchChange }) {
   const [profile, setProfile] = React.useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
 
   React.useEffect(() => {
@@ -41,6 +41,8 @@ export default function TopBar({ onMenuClick, title = "AlumniConnect", showSearc
               className="w-full bg-surface-container-low rounded-lg py-2 pl-xl pr-md text-body-lg font-body-lg text-on-surface placeholder:text-on-surface-variant border border-transparent focus:border-primary focus:ring-0 focus:bg-surface-container-lowest outline-none transition-all" 
               placeholder={searchPlaceholder} 
               type="text"
+              value={searchValue}
+              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
             />
           </div>
         )}

@@ -55,9 +55,26 @@ export const updateProfile = async (req, res) =>{
             message: "Profile updated successfully",
             user: userWithoutPassword
         });
-        
     } catch (error) {
         console.error("Update Profile Error:", error);
         return res.status(500).json({success:false, message: "Server error updating profile"});
     }   
+};
+
+// Get a user profile by ID
+export const getUserById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id }
+        });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        const { password: _, ...userWithoutPassword } = user;
+        return res.json({ success: true, user: userWithoutPassword });
+    } catch (error) {
+        console.error("Get User By Id Error:", error);
+        return res.status(500).json({ success: false, message: "Server error retrieving user profile" });
+    }
 };

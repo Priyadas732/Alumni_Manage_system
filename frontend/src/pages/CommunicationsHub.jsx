@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { chatAPI } from '../api';
 
 export default function CommunicationsHub() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const location = useLocation();
   
   const [conversations, setConversations] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
@@ -19,10 +21,23 @@ export default function CommunicationsHub() {
 
   useEffect(() => {
     chatAPI.getConversations()
-      .then(data => setConversations(data.conversations || []))
+      .then(data => {
+        const list = data.conversations || [];
+        setConversations(list);
+        
+        // Auto-select conversation from query parameters
+        const params = new URLSearchParams(location.search);
+        const urlConvId = params.get('conversation');
+        if (urlConvId) {
+          const matched = list.find(c => c.id === urlConvId);
+          if (matched) {
+            setActiveChat(matched);
+          }
+        }
+      })
       .catch(err => console.error(err))
       .finally(() => setLoadingChats(false));
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     if (activeChat) {

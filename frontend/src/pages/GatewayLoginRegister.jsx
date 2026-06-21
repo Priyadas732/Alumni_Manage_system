@@ -10,6 +10,28 @@ export default function GatewayLoginRegister() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Role setup for registration
+  const roleParam = searchParams.get('role');
+  const initialRole = (roleParam === 'alumni' || roleParam === 'alumnus') ? 'ALUMNI' : 'STUDENT';
+  const [selectedRole, setSelectedRole] = useState(initialRole);
+
+  const redirectBasedOnRoleAndProfile = (user) => {
+    const role = (user.role || 'STUDENT').toUpperCase();
+    if (role === 'ALUMNI') {
+      if (user.company && user.jobTitle) {
+        navigate('/dashboard');
+      } else {
+        navigate('/register/alumni');
+      }
+    } else {
+      if (user.college && user.branch) {
+        navigate('/dashboard');
+      } else {
+        navigate('/register/student');
+      }
+    }
+  };
+
   // ── Login ──────────────────────────────────────────────────────────────────
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -27,7 +49,7 @@ export default function GatewayLoginRegister() {
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('userRole', data.user.role ? data.user.role.toLowerCase() : 'student');
 
-      navigate('/hub');            // go to the main dashboard
+      redirectBasedOnRoleAndProfile(data.user);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,14 +68,14 @@ export default function GatewayLoginRegister() {
     const password = e.target.password.value;
 
     try {
-      const data = await authAPI.register(name, email, password);
+      const data = await authAPI.register(name, email, password, selectedRole);
 
       // Save token so the user is logged in immediately after registration
       localStorage.setItem('token', data.token || '');
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('userRole', data.user.role ? data.user.role.toLowerCase() : 'student');
 
-      navigate('/setup');           // go to profile setup
+      redirectBasedOnRoleAndProfile(data.user);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -180,6 +202,35 @@ export default function GatewayLoginRegister() {
                 className="flex flex-col gap-md transition-opacity duration-300"
                 onSubmit={handleRegister}
               >
+                <div>
+                  <label className="font-label-md text-label-md text-on-surface-variant mb-xs block pl-xs">Register As</label>
+                  <div className="flex gap-md">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRole('STUDENT')}
+                      className={`flex-1 py-md px-md rounded-lg font-label-md text-label-md border transition-all flex items-center justify-center gap-xs cursor-pointer ${
+                        selectedRole === 'STUDENT'
+                          ? 'bg-primary/10 border-primary text-primary font-bold shadow-sm'
+                          : 'bg-surface-container-low border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">school</span>
+                      Student
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRole('ALUMNI')}
+                      className={`flex-1 py-md px-md rounded-lg font-label-md text-label-md border transition-all flex items-center justify-center gap-xs cursor-pointer ${
+                        selectedRole === 'ALUMNI'
+                          ? 'bg-secondary/10 border-secondary text-secondary font-bold shadow-sm'
+                          : 'bg-surface-container-low border-outline-variant text-on-surface-variant hover:bg-surface-container-high'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">workspace_premium</span>
+                      Alumni
+                    </button>
+                  </div>
+                </div>
                 <div>
                   <label className="font-label-md text-label-md text-on-surface-variant mb-xs block pl-xs">Full Name</label>
                   <div className="relative">

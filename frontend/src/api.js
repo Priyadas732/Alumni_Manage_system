@@ -46,6 +46,8 @@ export const userAPI = {
       method: 'PUT',
       body: JSON.stringify(profileData),
     }),
+
+  getUserById: (id) => request(`/users/${id}`),
 };
 
 // ─── ALUMNI DIRECTORY & REQUESTS ──────────────────────────────────────────────
@@ -100,9 +102,9 @@ export const chatAPI = {
       body: JSON.stringify({ content }),
     }),
 
-  startConversation: (participantId) =>
+  startConversation: (recipientId) =>
     request('/conversations', {
       method: 'POST',
-      body: JSON.stringify({ participantId }),
+      body: JSON.stringify({ recipientId }),
     }),
 };

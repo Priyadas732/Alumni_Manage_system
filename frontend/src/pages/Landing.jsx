@@ -153,7 +153,7 @@ export default function Landing() {
                 </ul>
               </div>
               <div className="relative z-10 pt-lg">
-                <Link to={isLoggedIn ? "/hub" : "/login?tab=register"} className="w-full inline-flex items-center justify-center bg-primary text-on-primary font-label-md text-label-md py-md rounded-lg group-hover:shadow-lg transition-all active:scale-[0.98]">
+                <Link to={isLoggedIn ? "/hub" : "/login?tab=register&role=student"} className="w-full inline-flex items-center justify-center bg-primary text-on-primary font-label-md text-label-md py-md rounded-lg group-hover:shadow-lg transition-all active:scale-[0.98]">
                   Get Started
                 </Link>
               </div>
@@ -185,7 +185,7 @@ export default function Landing() {
                 </ul>
               </div>
               <div className="relative z-10 pt-lg">
-                <Link to={isLoggedIn ? "/hub" : "/login?tab=register"} className="w-full inline-flex items-center justify-center bg-secondary text-on-secondary font-label-md text-label-md py-md rounded-lg group-hover:shadow-lg transition-all active:scale-[0.98]">
+                <Link to={isLoggedIn ? "/hub" : "/login?tab=register&role=alumni"} className="w-full inline-flex items-center justify-center bg-secondary text-on-secondary font-label-md text-label-md py-md rounded-lg group-hover:shadow-lg transition-all active:scale-[0.98]">
                   Join Now
                 </Link>
               </div>

@@ -31,12 +31,21 @@ export const register = async (req, res) => {
                 role: role || 'STUDENT'            
             }
         });
+        
+        // Generate JWT token for immediate login after registration
+        const token = jwt.sign(
+            {id: newUser.id, role: newUser.role},
+            JWT_SECRET,
+            {expiresIn: '1d'}
+        );
+
         // Exclude password from the returned user object
         const {password: _, ...userWithoutPassword} = newUser;
 
         return res.status(201).json({
             success:true,
             message: "User registered successfully",
+            token,
             user: userWithoutPassword
         });
     }catch(error){
