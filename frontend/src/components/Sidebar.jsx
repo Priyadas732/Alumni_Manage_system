@@ -23,10 +23,10 @@ export default function Sidebar({ isOpen, onClose }) {
       <div className="flex items-center justify-between mb-xl mt-sm px-sm">
         <div className="flex items-center gap-md">
           <div className="w-10 h-10 rounded-lg bg-primary text-on-primary flex items-center justify-center font-headline-md text-headline-md shadow-sm font-bold">
-            L
+            A
           </div>
           <div>
-            <h1 className="font-headline-md text-headline-md font-bold text-primary truncate">LegacyBridge</h1>
+            <h1 className="font-headline-md text-headline-md font-bold text-primary truncate">AlumniConnect</h1>
             <p className="font-label-md text-label-md text-on-surface-variant truncate">Student & Alumni</p>
           </div>
         </div>

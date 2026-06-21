@@ -61,7 +61,7 @@ export default function ExperienceFeed() {
       <div className="flex-1 flex flex-col h-full overflow-hidden md:pl-64">
         <TopBar 
           onMenuClick={() => setIsSidebarOpen(true)} 
-          title="LegacyBridge" 
+          title="AlumniConnect" 
           searchPlaceholder="Search updates, tags, or topics..." 
         />
         

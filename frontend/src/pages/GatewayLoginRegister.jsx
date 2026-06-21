@@ -74,7 +74,7 @@ export default function GatewayLoginRegister() {
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
             <span className="material-symbols-outlined" data-icon="hub">hub</span>
           </div>
-          <h1 className="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">LegacyBridge</h1>
+          <h1 className="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">AlumniConnect</h1>
         </div>
 
         <div className="relative z-10 max-w-lg pb-xl">

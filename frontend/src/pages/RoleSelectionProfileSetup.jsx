@@ -126,7 +126,7 @@ export default function RoleSelectionProfileSetup() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-container/20 mb-margin">
                   <span className="material-symbols-outlined text-4xl text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>hub</span>
                 </div>
-                <h1 className="font-headline-lg text-headline-lg text-on-surface mb-sm">Welcome to LegacyBridge</h1>
+                <h1 className="font-headline-lg text-headline-lg text-on-surface mb-sm">Welcome to AlumniConnect</h1>
                 <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto">
                   Select your primary role to tailor your experience within the network.
                 </p>

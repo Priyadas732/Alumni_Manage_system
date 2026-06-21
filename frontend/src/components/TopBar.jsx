@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default function TopBar({ onMenuClick, title = "LegacyBridge", showSearch = true, searchPlaceholder = "Search..." }) {
+export default function TopBar({ onMenuClick, title = "AlumniConnect", showSearch = true, searchPlaceholder = "Search..." }) {
   const [profile, setProfile] = React.useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
 
   React.useEffect(() => {

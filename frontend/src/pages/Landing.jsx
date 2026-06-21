@@ -34,7 +34,7 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center w-full px-lg py-sm bg-background/80 backdrop-blur-md border-b border-outline-variant/20">
         <div className="flex items-center gap-sm cursor-pointer" onClick={() => navigate('/')}>
           <span className="material-symbols-outlined text-primary text-3xl">hub</span>
-          <span className="font-headline-md text-headline-md font-bold text-primary">LegacyBridge</span>
+          <span className="font-headline-md text-headline-md font-bold text-primary">AlumniConnect</span>
         </div>
         
         {/* Desktop nav links */}
@@ -263,7 +263,7 @@ export default function Landing() {
           <div className="col-span-1 md:col-span-2 space-y-md">
             <div className="font-headline-md text-headline-md font-bold text-primary flex items-center gap-sm">
               <span className="material-symbols-outlined text-primary text-3xl">hub</span>
-              LegacyBridge
+              AlumniConnect
             </div>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-sm">
               The premier gateway for university alumni and students to build meaningful professional relationships that last a lifetime.
@@ -294,7 +294,7 @@ export default function Landing() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-xl pt-lg border-t border-outline-variant/30 flex flex-col sm:flex-row justify-between items-center text-on-surface-variant font-label-md text-label-md px-gutter gap-sm">
-          <span>© 2026 LegacyBridge. All rights reserved.</span>
+          <span>© 2026 AlumniConnect. All rights reserved.</span>
           <div className="flex items-center gap-xs">
             <span className="material-symbols-outlined text-sm">language</span>
             <span>English (US)</span>
@@ -315,7 +315,7 @@ export default function Landing() {
             <div className="flex items-center justify-between mb-xl">
               <div className="font-headline-md text-headline-md font-extrabold text-primary flex items-center gap-sm">
                 <span className="material-symbols-outlined text-primary">hub</span>
-                LegacyBridge
+                AlumniConnect
               </div>
               <button 
                 onClick={() => setIsMobileMenuOpen(false)}

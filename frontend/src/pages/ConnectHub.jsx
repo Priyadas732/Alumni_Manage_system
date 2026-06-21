@@ -39,7 +39,7 @@ export default function ConnectHub() {
       <div className="flex-1 flex flex-col h-full overflow-hidden md:pl-64">
         <TopBar 
           onMenuClick={() => setIsSidebarOpen(true)} 
-          title="LegacyBridge" 
+          title="AlumniConnect" 
           searchPlaceholder="Search alumni by name, role, or company..." 
         />
         
