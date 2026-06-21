@@ -1,6 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function AlumniProfile({ profile, onSave }) {
+  const fileInputRef = useRef(null);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, avatar: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Form states matching the mockup fields
   const [formData, setFormData] = useState({
     name: profile.name || '',
@@ -86,12 +103,41 @@ export default function AlumniProfile({ profile, onSave }) {
       
       {/* Top Header Section with Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-md border-b border-slate-200 pb-md">
-        <div>
-          <span className="text-[#0a58ca] text-xs font-bold uppercase tracking-wider">Alumni Dashboard</span>
-          <h1 className="text-3xl font-extrabold text-[#0f2942] tracking-tight mt-[2px]">Manage Your Profile</h1>
-          <p className="text-[#718096] text-sm mt-[2px]">Update your information to help students and fellow alumni connect with you.</p>
+        <div className="flex flex-col sm:flex-row items-center gap-lg flex-1">
+          {/* Avatar Uploader */}
+          <div className="relative group shrink-0">
+            <div 
+              onClick={handleAvatarClick}
+              className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#0a58ca]/20 cursor-pointer hover:brightness-90 transition-all relative"
+            >
+              <img 
+                alt="Profile Avatar" 
+                className="w-full h-full object-cover" 
+                src={formData.avatar}
+              />
+              <div 
+                className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+              >
+                <span className="material-symbols-outlined text-[20px]">photo_camera</span>
+              </div>
+            </div>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleAvatarChange} 
+              accept="image/*" 
+              className="hidden"
+            />
+          </div>
+          
+          <div className="text-center sm:text-left min-w-0">
+            <span className="text-[#0a58ca] text-xs font-bold uppercase tracking-wider">Alumni Dashboard</span>
+            <h1 className="text-3xl font-extrabold text-[#0f2942] tracking-tight mt-[2px]">{formData.name || 'Manage Your Profile'}</h1>
+            <p className="text-[#718096] text-sm mt-[2px]">Update your information to help students and fellow alumni connect with you.</p>
+          </div>
         </div>
-        <div className="flex items-center gap-sm">
+        
+        <div className="flex items-center gap-sm shrink-0 self-center sm:self-start mt-4 sm:mt-0">
           <button 
             type="button" 
             onClick={handleDiscard}
@@ -122,7 +168,20 @@ export default function AlumniProfile({ profile, onSave }) {
               <h2 className="text-md font-extrabold uppercase tracking-wide">Professional Experience</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <div className="flex flex-col gap-xs pb-sm border-b border-slate-100">
+              <label className="text-xs font-bold text-[#718096]">Full Name</label>
+              <input 
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                placeholder="John Doe"
+                className="w-full px-md py-sm bg-[#f8fafc] border border-[#cbd5e1] rounded-lg focus:ring-2 focus:ring-[#0a58ca]/20 focus:border-[#0a58ca] outline-none transition-all text-sm font-semibold"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-md pt-xs">
               <div className="flex flex-col gap-xs">
                 <label className="text-xs font-bold text-[#718096]">Current Company</label>
                 <input 

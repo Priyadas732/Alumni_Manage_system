@@ -149,7 +149,16 @@ export default function ExperienceFeed() {
     return tagMatch;
   });
 
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const [currentUser, setCurrentUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      setCurrentUser(JSON.parse(localStorage.getItem('user') || '{}'));
+    };
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
+  }, []);
+
   const userAvatar = currentUser.avatarUrl || currentUser.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80";
 
   return (

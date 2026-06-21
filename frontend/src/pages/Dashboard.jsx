@@ -11,11 +11,15 @@ export default function Dashboard() {
   const [pendingCount, setPendingCount] = useState(8);
 
   useEffect(() => {
-    // Get current user name
-    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-    if (currentUser.name) {
-      setUserName(currentUser.name.split(' ')[0]);
-    }
+    const loadUserData = () => {
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (currentUser.name) {
+        setUserName(currentUser.name.split(' ')[0]);
+      }
+    };
+    
+    loadUserData();
+    window.addEventListener('profileUpdated', loadUserData);
 
     // Fetch real pending requests count
     requestAPI.getMyRequests()
@@ -26,6 +30,10 @@ export default function Dashboard() {
         }
       })
       .catch(err => console.error(err));
+
+    return () => {
+      window.removeEventListener('profileUpdated', loadUserData);
+    };
   }, []);
 
   return (
