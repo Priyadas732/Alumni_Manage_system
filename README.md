@@ -1,16 +1,61 @@
-# React + Vite
+# LegacyBridge
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to LegacyBridge! The project has been restructured into a monorepo containing distinct directories for frontend and backend logic.
 
-Currently, two official plugins are available:
+## Directory Structure
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```text
+legacybridge/
+├── backend/            # Express.js backend & Prisma schema/database configuration
+├── frontend/           # React + Vite frontend application & assets
+├── package.json        # Root package.json defining npm workspaces
+└── README.md           # Project documentation (this file)
+```
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting Started
 
-## Expanding the ESLint configuration
+### 1. Installation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+To install dependencies for both the frontend and backend, run npm install at the root level:
+
+```bash
+npm install
+```
+
+### 2. Running the Applications
+
+You can start the applications either from the root directory using the root workspaces scripts, or by navigating into the respective folders.
+
+#### Starting from the Root Directory
+
+- **Run Frontend (Vite dev server):**
+  ```bash
+  npm run dev
+  # or: npm run dev:frontend
+  ```
+- **Run Backend (Express server):**
+  ```bash
+  npm run start:backend
+  ```
+
+#### Starting from Respective Folders
+
+- **Frontend:**
+  ```bash
+  cd frontend
+  npm run dev
+  ```
+- **Backend:**
+  ```bash
+  cd backend
+  npm start
+  ```
+
+---
+
+## Technologies Used
+
+- **Frontend:** React, Vite, TailwindCSS, ESLint
+- **Backend:** Express.js, Prisma (PostgreSQL database ORM)

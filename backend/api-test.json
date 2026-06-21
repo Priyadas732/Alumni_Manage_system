@@ -1,0 +1,92 @@
+{
+  "endpoints": {
+    "1_register": {
+      "method": "POST",
+      "url": "http://localhost:5001/auth/register",
+      "body": {
+        "name": "Priya Sharma",
+        "email": "priya@example.com",
+        "password": "securepassword123",
+        "role": "STUDENT"
+      }
+    },
+    "2_register_alumni": {
+      "method": "POST",
+      "url": "http://localhost:5001/auth/register",
+      "body": {
+        "name": "Rahul Verma",
+        "email": "rahul@example.com",
+        "password": "alumni@123",
+        "role": "ALUMNI"
+      }
+    },
+    "3_login": {
+      "method": "POST",
+      "url": "http://localhost:5001/auth/login",
+      "body": {
+        "email": "priya@example.com",
+        "password": "securepassword123"
+      }
+    },
+    "4_get_profile": {
+      "method": "GET",
+      "url": "http://localhost:5001/users/profile",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
+      }
+    },
+    "5_update_profile": {
+      "method": "PUT",
+      "url": "http://localhost:5001/users/profile",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
+      },
+      "body": {
+        "name": "Priya Sharma",
+        "college": "IIT Delhi",
+        "branch": "Computer Science",
+        "gradYear": "2024",
+        "linkedin": "https://linkedin.com/in/priyasharma"
+      }
+    },
+    "6_get_directory": {
+      "method": "GET",
+      "url": "http://localhost:5001/requests/directory?role=ALUMNI",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
+      }
+    },
+    "7_send_request": {
+      "method": "POST",
+      "url": "http://localhost:5001/requests/create",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
+      },
+      "body": {
+        "receiverId": "ALUMNI_USER_ID_HERE",
+        "type": "REFERRAL",
+        "jobLink": "https://careers.google.com/jobs/123",
+        "message": "Hi, I would love a referral for this role!"
+      }
+    },
+    "8_create_post": {
+      "method": "POST",
+      "url": "http://localhost:5001/posts",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
+      },
+      "body": {
+        "content": "Just got placed at Google! Hard work pays off 🎉",
+        "tags": ["placement", "google", "success"]
+      }
+    },
+    "9_welcome": {
+      "method": "GET",
+      "url": "http://localhost:5001/api/welcome"
+    },
+    "10_db_check": {
+      "method": "GET",
+      "url": "http://localhost:5001/api/db-check"
+    }
+  }
+}

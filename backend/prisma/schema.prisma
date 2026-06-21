@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  ALUMNI
+}
+
+enum RequestType {
+  REFERRAL
+  MENTORSHIP
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(STUDENT)
+  linkedin  String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Student Profile specific fields
+  scholarId String? @unique
+  college   String?
+  branch    String?
+  gradYear  String?
+  resumeUrl String?
+
+  // Alumni Profile specific fields
+  company         String?
+  jobTitle        String?
+  location        String?
+  openToMentoring Boolean @default(true)
+  openToReferrals Boolean @default(false)
+
+  // Relations
+  sentRequests     Request[]     @relation("SentRequests")
+  receivedRequests Request[]     @relation("ReceivedRequests")
+  posts            Post[]
+  likes            Like[]
+  comments         Comment[]
+  conversations    Participant[]
+  messages         Message[]
+}
+
+model Request {
+  id         String        @id @default(uuid())
+  senderId   String
+  sender     User          @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User          @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  type       RequestType
+  status     RequestStatus @default(PENDING)
+  jobLink    String?
+  resumeUrl  String?
+  message    String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  imageUrl  String?
+  videoUrl  String?
+  tags      String[]
+  createdAt DateTime  @default(now())
+  likes     Like[]
+  comments  Comment[]
+}
+
+model Like {
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id           String        @id @default(uuid())
+  createdAt    DateTime      @default(now())
+  participants Participant[]
+  messages     Message[]
+}
+
+model Participant {
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content        String
+  createdAt      DateTime     @default(now())
+}

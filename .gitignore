@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated client
+/frontend/src/generated/prisma
+/backend/src/generated/prisma
