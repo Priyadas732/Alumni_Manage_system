@@ -1,5 +1,5 @@
 {
-  "name": "legacybridge-root",
+  "name": "alumniconnect-root",
   "private": true,
   "workspaces": [
     "frontend"

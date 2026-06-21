@@ -1,11 +1,11 @@
-# LegacyBridge
+# AlumniConnect
 
-Welcome to LegacyBridge! The project has been restructured into a monorepo containing distinct directories for frontend and backend logic.
+Welcome to AlumniConnect! The project has been restructured into a monorepo containing distinct directories for frontend and backend logic.
 
 ## Directory Structure
 
 ```text
-legacybridge/
+alumniconnect/
 ├── backend/            # Express.js backend & Prisma schema/database configuration
 ├── frontend/           # React + Vite frontend application & assets
 ├── package.json        # Root package.json defining npm workspaces
