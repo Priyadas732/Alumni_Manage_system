@@ -106,16 +106,10 @@ if (process.env.NODE_ENV === 'production') {
     const frontendDistPath = path.join(__dirname, '../../frontend/dist');
     app.use(express.static(frontendDistPath));
     
-    // Catch-all route to serve index.html for SPA routing
-    app.get('*', (req, res) => {
-        if (req.path.startsWith('/api') || 
-            req.path.startsWith('/auth') || 
-            req.path.startsWith('/users') || 
-            req.path.startsWith('/requests') || 
-            req.path.startsWith('/posts') || 
-            req.path.startsWith('/conversations')) {
-            return res.status(404).json({ success: false, message: "API endpoint not found" });
-        }
+    // SPA catch-all: serve index.html for any unmatched GET request
+    // API routes are registered above, so they match first
+    app.use((req, res, next) => {
+        if (req.method !== 'GET') return next();
         res.sendFile(path.join(frontendDistPath, 'index.html'));
     });
 }
