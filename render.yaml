@@ -4,15 +4,15 @@ services:
     runtime: node
     region: oregon
     plan: free
-    rootDir: backend
+    # No rootDir — build from repo root so npm workspaces resolves correctly
     buildCommand: npm run render-build
-    startCommand: node src/server.js
+    startCommand: npm run render-start
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false  # Must be set manually in the Render dashboard
+        sync: false
       - key: JWT_SECRET
-        generateValue: true  # Render will auto-generate a random secret
+        generateValue: true
       - key: ALLOWED_ORIGIN
-        sync: false  # Set to your frontend URL after deployment
+        sync: false
