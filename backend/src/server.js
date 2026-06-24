@@ -87,7 +87,7 @@ app.get('/api/welcome', (request, response) => {
 // Database connectivity check endpoint
 app.get('/api/db-check', async (request, response) => {
     try {
-        await prisma.$connect();
+        await prisma.user.findMany({ take: 1 });
         response.json({
             success: true,
             message: "Successfully connected to Supabase PostgreSQL database!"
