@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import UserAvatar from './UserAvatar';
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
@@ -116,13 +117,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
         <div className="flex items-center justify-between px-1 mt-1">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#3b82f6] shrink-0">
-              <img 
-                src={user.avatarUrl || user.avatar || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80'} 
-                className="w-full h-full object-cover" 
-                alt="Avatar"
-              />
-            </div>
+            <UserAvatar user={user} className="w-10 h-10 border-2 border-[#3b82f6]" />
             <div className="min-w-0">
               <span className="text-xs font-black text-[#0f2942] block truncate leading-tight">
                 {user.name || 'Test Alumnus'}

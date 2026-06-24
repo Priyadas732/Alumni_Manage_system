@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+import io from 'socket.io-client';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { chatAPI } from '../api';
+import UserAvatar from '../components/UserAvatar';
 
 export default function CommunicationsHub() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -18,6 +20,65 @@ export default function CommunicationsHub() {
   
   const messagesEndRef = useRef(null);
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const socketRef = useRef(null);
+  const activeChatIdRef = useRef(null);
+
+  // Sync active chat ID to ref for socket handler
+  useEffect(() => {
+    activeChatIdRef.current = activeChat?.id;
+  }, [activeChat]);
+
+  // Connect to Socket.io server
+  useEffect(() => {
+    if (!currentUser.id) return;
+
+    const socketUrl = window.location.hostname === 'localhost' ? 'http://localhost:5001' : window.location.origin;
+    const socket = io(socketUrl, {
+      transports: ['websocket', 'polling']
+    });
+
+    socketRef.current = socket;
+
+    socket.emit('join', currentUser.id);
+
+    socket.on('message_received', (msg) => {
+      if (msg.conversationId === activeChatIdRef.current) {
+        setMessages(prev => {
+          if (!prev.some(m => m.id === msg.id)) {
+            scrollToBottom();
+            return [...prev, msg];
+          }
+          return prev;
+        });
+      }
+
+      // Update last message in the sidebar
+      setConversations(prev => {
+        const exists = prev.some(conv => conv.id === msg.conversationId);
+        if (exists) {
+          return prev.map(conv => {
+            if (conv.id === msg.conversationId) {
+              return { ...conv, messages: [msg] };
+            }
+            return conv;
+          });
+        } else {
+          // If a new conversation starts, fetch conversations list
+          chatAPI.getConversations()
+            .then(data => {
+              setConversations(data.conversations || []);
+            })
+            .catch(err => console.error(err));
+          return prev;
+        }
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [currentUser.id]);
 
   useEffect(() => {
     chatAPI.getConversations()
@@ -124,15 +185,7 @@ export default function CommunicationsHub() {
                     onClick={() => setActiveChat(conv)}
                     className={`w-full text-left p-md flex items-start gap-md hover:bg-surface-container transition-colors border-b border-outline-variant/20 cursor-pointer ${isActive ? 'bg-surface-container-highest border-l-4 border-primary' : ''}`}
                   >
-                    <div className="relative shrink-0">
-                      {otherUser?.avatarUrl ? (
-                        <img alt={otherUser.name} className="w-12 h-12 rounded-full object-cover border border-outline-variant" src={otherUser.avatarUrl}/>
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-lg">
-                          {otherUser?.name?.charAt(0) || '?'}
-                        </div>
-                      )}
-                    </div>
+                    <UserAvatar user={otherUser} className="w-12 h-12" />
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline mb-1">
                         <h3 className="font-body-lg text-body-lg font-semibold text-on-surface truncate">{otherUser?.name || 'Unknown'}</h3>
@@ -164,13 +217,7 @@ export default function CommunicationsHub() {
                 {/* Chat Header */}
                 <header className="p-lg border-b border-outline-variant/50 flex justify-between items-center bg-surface-container-low">
                   <div className="flex items-center gap-md">
-                    {getOtherParticipant(activeChat)?.avatarUrl ? (
-                      <img alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-outline-variant" src={getOtherParticipant(activeChat)?.avatarUrl}/>
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold">
-                        {getOtherParticipant(activeChat)?.name?.charAt(0) || '?'}
-                      </div>
-                    )}
+                    <UserAvatar user={getOtherParticipant(activeChat)} className="w-10 h-10" />
                     <div>
                       <h2 className="font-headline-md text-headline-md font-semibold text-on-surface">{getOtherParticipant(activeChat)?.name}</h2>
                       <p className="font-label-md text-label-md text-on-surface-variant">{getOtherParticipant(activeChat)?.role}</p>

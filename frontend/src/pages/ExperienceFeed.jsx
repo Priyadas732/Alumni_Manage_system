@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { postAPI } from '../api';
+import UserAvatar from '../components/UserAvatar';
 
 export default function ExperienceFeed() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,41 +22,17 @@ export default function ExperienceFeed() {
   // Active Filter Pill
   const [activeFilter, setActiveFilter] = useState('All Posts');
 
-  const mockPosts = [
-    {
-      id: 'mock-post-1',
-      content: "Thrilled to share that I've started a new position as Senior Product Designer at Acme Corp! Looking forward to diving into complex systems and building the future of enterprise software with such a talented team. Huge thanks to everyone who supported me during this transition. 🚀",
-      tags: ['NEWJOB'],
-      imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
-      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2h ago
-      likesCount: 124,
-      commentsCount: 32,
-      author: {
-        name: 'Marcus Chen',
-        jobTitle: 'Senior Product Designer',
-        company: 'Acme Corp',
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
-      }
-    },
-    {
-      id: 'mock-post-2',
-      content: "I'm opening up 2 mentorship slots for junior developers looking to move into management or lead roles. If you're passionate about scaling teams and technical strategy, I'd love to connect and share some insights. Drop a comment below or DM me!",
-      tags: ['MENTORSHIP'],
-      isArticle: true,
-      articleTitle: 'The Transition from IC to Engineering Leadership',
-      articleDesc: 'Moving from a senior developer role into management requires a complete shift in mindset. Here are the top 5...',
-      articleImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=300&q=80',
-      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5h ago
-      likesCount: 258,
-      commentsCount: 89,
-      author: {
-        name: 'Sarah Jenkins',
-        jobTitle: 'Engineering Manager',
-        company: 'CloudScale',
-        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80'
-      }
-    }
-  ];
+
+  const [activeComments, setActiveComments] = useState({});
+  const [commentInputs, setCommentInputs] = useState({});
+  const [likingPosts, setLikingPosts] = useState({});
+
+  const toggleComments = (postId) => {
+    setActiveComments(prev => ({
+      ...prev,
+      [postId]: !prev[postId]
+    }));
+  };
 
   const fetchPosts = () => {
     setLoading(true);
@@ -72,13 +49,12 @@ export default function ExperienceFeed() {
   }, []);
 
   useEffect(() => {
-    // Merge database posts and mock posts
-    const formattedDb = dbPosts.map(post => ({
+    const formatted = dbPosts.map(post => ({
       ...post,
-      likesCount: post.likesCount || (post.likes ? post.likes.length : 0),
-      commentsCount: post.commentsCount || (post.comments ? post.comments.length : 0)
+      likesCount: post.likeCount !== undefined ? post.likeCount : (post.likesCount || (post.likes ? post.likes.length : 0)),
+      commentsCount: post.commentsCount !== undefined ? post.commentsCount : (post.comments ? post.comments.length : 0)
     }));
-    setPosts([...formattedDb, ...mockPosts]);
+    setPosts(formatted);
   }, [dbPosts]);
 
   const handleCreatePost = async () => {
@@ -101,21 +77,28 @@ export default function ExperienceFeed() {
   };
 
   const handleLike = async (postId) => {
-    if (postId.startsWith('mock-')) {
-      setPosts(prev => prev.map(p => {
-        if (p.id === postId) {
-          return { ...p, likesCount: p.likesCount + 1 };
-        }
-        return p;
-      }));
-      return;
-    }
-
+    if (likingPosts[postId]) return;
+    setLikingPosts(prev => ({ ...prev, [postId]: true }));
     try {
       await postAPI.toggleLike(postId);
       fetchPosts();
     } catch (err) {
-      console.error("Like failed", err);
+      console.error('Like failed', err);
+    } finally {
+      setLikingPosts(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const handleAddComment = async (postId) => {
+    const commentText = commentInputs[postId];
+    if (!commentText?.trim()) return;
+
+    try {
+      await postAPI.addComment(postId, commentText);
+      setCommentInputs(prev => ({ ...prev, [postId]: '' }));
+      fetchPosts();
+    } catch (err) {
+      alert('Failed to add comment: ' + err.message);
     }
   };
 
@@ -159,7 +142,7 @@ export default function ExperienceFeed() {
     return () => window.removeEventListener('profileUpdated', handleProfileUpdate);
   }, []);
 
-  const userAvatar = currentUser.avatarUrl || currentUser.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80";
+
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#edf8fc]">
@@ -182,9 +165,7 @@ export default function ExperienceFeed() {
               {/* Post Composer Card */}
               <div className="bg-white rounded-2xl p-5 border border-[#e2e8f0] shadow-sm flex flex-col gap-4">
                 <div className="flex gap-4 items-start">
-                  <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm bg-slate-50 flex items-center justify-center font-bold">
-                    <img src={userAvatar} alt="user avatar" className="w-full h-full object-cover" />
-                  </div>
+                  <UserAvatar user={currentUser} className="w-10 h-10" />
                   <div className="flex-1">
                     {isComposing ? (
                       <div className="flex flex-col gap-3">
@@ -314,13 +295,7 @@ export default function ExperienceFeed() {
                       {/* Author Header */}
                       <div className="p-5 flex justify-between items-start">
                         <div className="flex gap-3 items-center">
-                          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-slate-100 flex items-center justify-center font-bold text-slate-600">
-                            {post.author?.avatarUrl ? (
-                              <img src={post.author.avatarUrl} alt={post.author.name} className="w-full h-full object-cover" />
-                            ) : (
-                              post.author?.name?.charAt(0) || 'U'
-                            )}
-                          </div>
+                          <UserAvatar user={post.author} className="w-10 h-10" />
                           <div>
                             <div className="flex items-center gap-2">
                               <h3 className="text-sm font-bold text-[#0f2942]">{post.author?.name || 'Member'}</h3>
@@ -384,14 +359,23 @@ export default function ExperienceFeed() {
                         <div className="flex gap-6">
                           <button 
                             onClick={() => handleLike(post.id)}
-                            className="flex items-center gap-1.5 text-slate-500 hover:text-[#3b82f6] transition-colors group cursor-pointer text-xs font-bold"
+                            className={`flex items-center gap-1.5 transition-colors group cursor-pointer text-xs font-bold ${
+                              post.likedByMe ? 'text-[#3b82f6]' : 'text-slate-500 hover:text-[#3b82f6]'
+                            }`}
                           >
-                            <span className="material-symbols-outlined text-[18px] group-hover:filled" style={{ fontVariationSettings: "'FILL' 1" }}>thumb_up</span>
+                            <span 
+                              className="material-symbols-outlined text-[18px]"
+                              style={{ fontVariationSettings: post.likedByMe ? "'FILL' 1" : "'FILL' 0" }}
+                            >
+                              thumb_up
+                            </span>
                             <span>{post.likesCount || 0}</span>
                           </button>
                           <button 
-                            onClick={() => alert("Open comments section...")}
-                            className="flex items-center gap-1.5 text-slate-500 hover:text-[#3b82f6] transition-colors cursor-pointer text-xs font-bold"
+                            onClick={() => toggleComments(post.id)}
+                            className={`flex items-center gap-1.5 transition-colors cursor-pointer text-xs font-bold ${
+                              activeComments[post.id] ? 'text-[#3b82f6]' : 'text-slate-500 hover:text-[#3b82f6]'
+                            }`}
                           >
                             <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
                             <span>{post.commentsCount || 0}</span>
@@ -406,6 +390,55 @@ export default function ExperienceFeed() {
                           <span>Share</span>
                         </button>
                       </div>
+
+                      {/* Comments Drawer / Section */}
+                      {activeComments[post.id] && (
+                        <div className="border-t border-slate-100 bg-slate-50/30 px-5 py-4 flex flex-col gap-4 animate-fade-in">
+                          {/* Comments List */}
+                          {post.comments && post.comments.length > 0 ? (
+                            <div className="flex flex-col gap-3">
+                              {post.comments.map(comment => (
+                                <div key={comment.id} className="flex gap-3 items-start text-sm">
+                                  <UserAvatar user={comment.user} className="w-8 h-8" />
+                                  <div className="bg-slate-100/80 rounded-2xl px-4 py-2 flex-1">
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-bold text-slate-800 text-xs">{comment.user?.name || "Member"}</span>
+                                      <span className="text-[10px] text-slate-400 font-semibold">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <p className="text-slate-600 text-xs font-semibold mt-1 leading-normal">{comment.content}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-slate-400 text-xs font-semibold text-center py-2">No comments yet. Be the first to share your thoughts!</p>
+                          )}
+
+                          {/* Write Comment Input */}
+                          <div className="flex gap-3 items-center pt-3 border-t border-slate-100">
+                            <UserAvatar user={currentUser} className="w-8 h-8" />
+                            <form 
+                              onSubmit={(e) => { e.preventDefault(); handleAddComment(post.id); }}
+                              className="flex-1 flex gap-2"
+                            >
+                              <input 
+                                type="text"
+                                value={commentInputs[post.id] || ""}
+                                onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
+                                placeholder="Write a comment..."
+                                className="flex-1 bg-white border border-slate-200 rounded-full px-4 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-blue-400 transition-colors shadow-sm"
+                              />
+                              <button
+                                type="submit"
+                                disabled={!commentInputs[post.id]?.trim()}
+                                className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-4 py-2 text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors shadow-sm"
+                              >
+                                Post
+                              </button>
+                            </form>
+                          </div>
+                        </div>
+                      )}
 
                     </article>
                   );

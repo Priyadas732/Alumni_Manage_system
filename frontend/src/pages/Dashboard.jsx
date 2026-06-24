@@ -2,13 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
-import { requestAPI, chatAPI } from '../api';
+import { requestAPI, chatAPI, userAPI } from '../api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userName, setUserName] = useState('Alex');
-  const [pendingCount, setPendingCount] = useState(8);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [stats, setStats] = useState({
+    connectionsCount: 0,
+    pendingCount: 0,
+    upcomingEvents: 0,
+    profileViews: 0
+  });
 
   useEffect(() => {
     const loadUserData = () => {
@@ -21,15 +27,15 @@ export default function Dashboard() {
     loadUserData();
     window.addEventListener('profileUpdated', loadUserData);
 
-    // Fetch real pending requests count
-    requestAPI.getMyRequests()
+    // Fetch dashboard stats from backend
+    userAPI.getDashboardStats()
       .then(data => {
-        const pending = (data.requests || []).filter(r => r.status === 'PENDING').length;
-        if (pending > 0) {
-          setPendingCount(pending);
+        if (data.success && data.stats) {
+          setStats(data.stats);
+          setPendingCount(data.stats.pendingCount);
         }
       })
-      .catch(err => console.error(err));
+      .catch(err => console.error("Error fetching stats:", err));
 
     return () => {
       window.removeEventListener('profileUpdated', loadUserData);
@@ -73,7 +79,7 @@ export default function Dashboard() {
                 </div>
                 <div className="mt-4">
                   <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Total Connections</span>
-                  <span className="text-2xl font-black text-[#0f2942] block mt-1">142</span>
+                  <span className="text-2xl font-black text-[#0f2942] block mt-1">{stats.connectionsCount}</span>
                 </div>
               </div>
 
@@ -83,7 +89,7 @@ export default function Dashboard() {
                   <div className="w-10 h-10 rounded-xl bg-slate-50 text-[#005cb8] flex items-center justify-center shadow-inner">
                     <span className="material-symbols-outlined text-[20px]">hourglass_empty</span>
                   </div>
-                  <span className="text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-md border border-red-100/50">3 New</span>
+                  <span className="text-[10px] font-black text-red-500 bg-red-50 px-2 py-0.5 rounded-md border border-red-100/50">New</span>
                 </div>
                 <div className="mt-4">
                   <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Pending Requests</span>
@@ -102,7 +108,9 @@ export default function Dashboard() {
                 </div>
                 <div className="mt-4">
                   <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Upcoming Events</span>
-                  <span className="text-2xl font-black text-[#0f2942] block mt-1">05</span>
+                  <span className="text-2xl font-black text-[#0f2942] block mt-1">
+                    {stats.upcomingEvents < 10 ? `0${stats.upcomingEvents}` : stats.upcomingEvents}
+                  </span>
                 </div>
               </div>
 
@@ -116,7 +124,7 @@ export default function Dashboard() {
                 </div>
                 <div className="mt-4">
                   <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Profile Views</span>
-                  <span className="text-2xl font-black text-[#0f2942] block mt-1">2.4k</span>
+                  <span className="text-2xl font-black text-[#0f2942] block mt-1">{stats.profileViews}</span>
                 </div>
               </div>
             </div>

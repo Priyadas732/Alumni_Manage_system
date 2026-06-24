@@ -48,6 +48,8 @@ export const userAPI = {
     }),
 
   getUserById: (id) => request(`/users/${id}`),
+
+  getDashboardStats: () => request('/users/dashboard-stats'),
 };
 
 // ─── ALUMNI DIRECTORY & REQUESTS ──────────────────────────────────────────────

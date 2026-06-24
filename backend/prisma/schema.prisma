@@ -37,19 +37,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Student Profile specific fields
-  scholarId String? @unique
-  college   String?
-  branch    String?
-  gradYear  String?
-  resumeUrl String?
-
-  // Alumni Profile specific fields
-  company         String?
-  jobTitle        String?
-  location        String?
-  openToMentoring Boolean @default(true)
-  openToReferrals Boolean @default(false)
+  // 1-to-1 relations to specific profiles
+  studentProfile StudentProfile?
+  alumniProfile  AlumniProfile?
 
   // Relations
   sentRequests     Request[]     @relation("SentRequests")
@@ -59,6 +49,28 @@ model User {
   comments         Comment[]
   conversations    Participant[]
   messages         Message[]
+}
+
+model StudentProfile {
+  id        String @id @default(uuid())
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scholarId String? @unique
+  college   String?
+  branch    String?
+  gradYear  String?
+  resumeUrl String?
+}
+
+model AlumniProfile {
+  id              String  @id @default(uuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company         String?
+  jobTitle        String?
+  location        String?
+  openToMentoring Boolean @default(true)
+  openToReferrals Boolean @default(false)
 }
 
 model Request {

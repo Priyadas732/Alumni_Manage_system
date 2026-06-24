@@ -2,6 +2,18 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from '../db.js';
 
+function flattenUser(user) {
+    if (!user) return null;
+    const { studentProfile, alumniProfile, ...rest } = user;
+    const profile = studentProfile || alumniProfile || {};
+    const { id: profileId, userId: _, ...profileRest } = profile;
+    return {
+        ...rest,
+        ...profileRest,
+        profileId
+    };
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key_change_me_later';
 
 //1. Register logic
@@ -28,7 +40,13 @@ export const register = async (req, res) => {
                 name,
                 email,
                 password: hashedPassword,
-                role: role || 'STUDENT'            
+                role: role || 'STUDENT',
+                studentProfile: (role === 'STUDENT' || !role) ? { create: {} } : undefined,
+                alumniProfile: role === 'ALUMNI' ? { create: {} } : undefined
+            },
+            include: {
+                studentProfile: true,
+                alumniProfile: true
             }
         });
         
@@ -61,8 +79,14 @@ export const login = async (req, res) => {
         return res.status(400).json({success:false, message:"Please provide email and password"});
     }
     try{
-        // Find user by email
-        const user = await prisma.user.findUnique({where: {email}});
+        // Find user by email with profiles included
+        const user = await prisma.user.findUnique({
+            where: {email},
+            include: {
+                studentProfile: true,
+                alumniProfile: true
+            }
+        });
         if(!user){
             return res.status(400).json({success:false, message:"Invalid credentials"});
         }
@@ -83,7 +107,7 @@ export const login = async (req, res) => {
             success: true,
             message: "Logged in successfully",
             token,
-            user: userWithoutPassword
+            user: flattenUser(userWithoutPassword)
         });
 
     }catch(error){

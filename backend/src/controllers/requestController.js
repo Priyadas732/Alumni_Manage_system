@@ -1,5 +1,17 @@
 import prisma from '../db.js';
 
+function flattenUser(user) {
+    if (!user) return null;
+    const { studentProfile, alumniProfile, ...rest } = user;
+    const profile = studentProfile || alumniProfile || {};
+    const { id: profileId, userId: _, ...profileRest } = profile;
+    return {
+        ...rest,
+        ...profileRest,
+        profileId
+    };
+}
+
 // 1. Get Directory of Users (with optional filters)
 export const getUsersDirectory = async (req, res) => {
     const { role, company, branch, search } = req.query;
@@ -8,30 +20,29 @@ export const getUsersDirectory = async (req, res) => {
         const users = await prisma.user.findMany({
             where: {
                 role: role ? role : undefined, // Filter by STUDENT or ALUMNI
-                company: company ? { contains: company, mode: 'insensitive' } : undefined,
-                branch: branch ? { contains: branch, mode: 'insensitive' } : undefined,
+                alumniProfile: company ? {
+                    company: { contains: company, mode: 'insensitive' }
+                } : undefined,
+                studentProfile: branch ? {
+                    branch: { contains: branch, mode: 'insensitive' }
+                } : undefined,
                 OR: search ? [
                     { name: { contains: search, mode: 'insensitive' } },
                     { email: { contains: search, mode: 'insensitive' } }
                 ] : undefined
             },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                linkedin: true,
-                avatarUrl: true,
-                company: true,
-                jobTitle: true,
-                location: true,
-                openToMentoring: true,
-                openToReferrals: true,
-                branch: true
+            include: {
+                studentProfile: true,
+                alumniProfile: true
             }
         });
 
-        return res.json({ success: true, users });
+        // Flatten users for frontend compatibility
+        const flattenedUsers = users.map(user => {
+            return flattenUser(user);
+        });
+
+        return res.json({ success: true, users: flattenedUsers });
     } catch (error) {
         console.error("Get Users Directory Error:", error);
         return res.status(500).json({ success: false, message: "Server error fetching user directory" });
@@ -81,9 +92,21 @@ export const getMyRequests = async (req, res) => {
             where: { senderId: userId },
             include: {
                 receiver: {
-                    select: { id: true, name: true, email: true, company: true, jobTitle: true }
+                    include: {
+                        studentProfile: true,
+                        alumniProfile: true
+                    }
                 }
             }
+        });
+
+        const formattedSent = sent.map(item => {
+            const receiverObj = flattenUser(item.receiver);
+            const { receiver, ...requestDetails } = item;
+            return {
+                ...requestDetails,
+                receiver: receiverObj
+            };
         });
 
         // Fetch requests received by this user (targeted to them)
@@ -91,15 +114,27 @@ export const getMyRequests = async (req, res) => {
             where: { receiverId: userId },
             include: {
                 sender: {
-                    select: { id: true, name: true, email: true, branch: true, resumeUrl: true }
+                    include: {
+                        studentProfile: true,
+                        alumniProfile: true
+                    }
                 }
             }
         });
 
+        const formattedReceived = received.map(item => {
+            const senderObj = flattenUser(item.sender);
+            const { sender, ...requestDetails } = item;
+            return {
+                ...requestDetails,
+                sender: senderObj
+            };
+        });
+
         return res.json({
             success: true,
-            sent,
-            received
+            sent: formattedSent,
+            received: formattedReceived
         });
     } catch (error) {
         console.error("Get Requests Error:", error);

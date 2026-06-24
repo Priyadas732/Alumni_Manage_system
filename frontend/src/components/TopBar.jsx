@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import UserAvatar from './UserAvatar';
 
 export default function TopBar({ onMenuClick, title = "AlumniConnect", showSearch = true, searchPlaceholder = "Search...", searchValue = "", onSearchChange }) {
   const [profile, setProfile] = React.useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
@@ -20,7 +21,6 @@ export default function TopBar({ onMenuClick, title = "AlumniConnect", showSearc
   }, []);
 
   const userName = profile.name || 'User';
-  const userAvatar = profile.avatarUrl || profile.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80";
 
   return (
     <header className="sticky top-0 w-full z-30 flex justify-between items-center px-gutter h-16 bg-surface-container-lowest border-b border-outline-variant/30">
@@ -63,13 +63,7 @@ export default function TopBar({ onMenuClick, title = "AlumniConnect", showSearc
         </button>
         <Link to="/profile" className="flex items-center gap-sm hover:opacity-85 transition-opacity pl-sm border-l border-outline-variant/30">
           <span className="font-label-md text-label-md text-on-surface font-semibold hidden md:inline">{userName}</span>
-          <div className="w-8 h-8 rounded-full bg-surface-variant overflow-hidden cursor-pointer border border-outline-variant/30 hover:ring-2 hover:ring-primary/50 transition-all shrink-0">
-            <img 
-              alt="User Profile Avatar" 
-              className="w-full h-full object-cover" 
-              src={userAvatar}
-            />
-          </div>
+          <UserAvatar user={profile} className="w-8 h-8" />
         </Link>
       </div>
     </header>

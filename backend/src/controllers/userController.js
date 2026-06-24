@@ -1,18 +1,34 @@
 import prisma from "../db.js";
 
+function flattenUser(user) {
+    if (!user) return null;
+    const { studentProfile, alumniProfile, ...rest } = user;
+    const profile = studentProfile || alumniProfile || {};
+    const { id: profileId, userId: _, ...profileRest } = profile;
+    return {
+        ...rest,
+        ...profileRest,
+        profileId
+    };
+}
+
 // Get current user profile
 export const getProfile = async (req, res) => {
     try{
         //req.user is set by verifyToken middleware
         const user = await prisma.user.findUnique({
-            where: {id: req.user.id} 
+            where: {id: req.user.id},
+            include: {
+                studentProfile: true,
+                alumniProfile: true
+            }
         });
         if(!user){
             return res.status(404).json({success: false, message: "User not found"});
         }
 
         const { password: _, ...userWithoutPassword } = user;
-        return res.json({success: true, user: userWithoutPassword});
+        return res.json({success: true, user: flattenUser(userWithoutPassword)});
 
     }catch(error){
         console.error("Get Profile Error:", error);
@@ -29,6 +45,7 @@ export const updateProfile = async (req, res) =>{
     } = req.body;
 
     try {
+        const targetRole = role || req.user.role;
         // Update user profile fields based on request body
         const updatedUser = await prisma.user.update({
             where: {id: req.user.id},
@@ -36,24 +53,30 @@ export const updateProfile = async (req, res) =>{
                 name,
                 linkedin,
                 avatarUrl,
-                scholarId,
-                college,
-                branch,
-                gradYear,
-                resumeUrl,
-                company,
-                jobTitle,
-                location,
-                openToMentoring,
-                openToReferrals,
-                role
+                role: targetRole,
+                studentProfile: targetRole === 'STUDENT' ? {
+                    upsert: {
+                        create: { scholarId, college, branch, gradYear, resumeUrl },
+                        update: { scholarId, college, branch, gradYear, resumeUrl }
+                    }
+                } : undefined,
+                alumniProfile: targetRole === 'ALUMNI' ? {
+                    upsert: {
+                        create: { company, jobTitle, location, openToMentoring, openToReferrals },
+                        update: { company, jobTitle, location, openToMentoring, openToReferrals }
+                    }
+                } : undefined
+            },
+            include: {
+                studentProfile: true,
+                alumniProfile: true
             }
         });
         const { password: _, ...userWithoutPassword} = updatedUser;
         return res.json({
             success: true,
             message: "Profile updated successfully",
-            user: userWithoutPassword
+            user: flattenUser(userWithoutPassword)
         });
     } catch (error) {
         console.error("Update Profile Error:", error);
@@ -66,15 +89,62 @@ export const getUserById = async (req, res) => {
     const { id } = req.params;
     try {
         const user = await prisma.user.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                studentProfile: true,
+                alumniProfile: true
+            }
         });
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
         const { password: _, ...userWithoutPassword } = user;
-        return res.json({ success: true, user: userWithoutPassword });
+        return res.json({ success: true, user: flattenUser(userWithoutPassword) });
     } catch (error) {
         console.error("Get User By Id Error:", error);
         return res.status(500).json({ success: false, message: "Server error retrieving user profile" });
+    }
+};
+
+// Get dashboard stats (Protected)
+export const getDashboardStats = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        
+        // Count connections: status === 'ACCEPTED' and (senderId === userId or receiverId === userId)
+        const connectionsCount = await prisma.request.count({
+            where: {
+                status: 'ACCEPTED',
+                OR: [
+                    { senderId: userId },
+                    { receiverId: userId }
+                ]
+            }
+        });
+
+        // Count pending incoming requests (where active user is receiver and status is PENDING)
+        const pendingCount = await prisma.request.count({
+            where: {
+                receiverId: userId,
+                status: 'PENDING'
+            }
+        });
+
+        // Total registered users count
+        const totalUsersCount = await prisma.user.count();
+
+        return res.json({
+            success: true,
+            stats: {
+                connectionsCount,
+                pendingCount,
+                totalUsersCount,
+                upcomingEvents: 2,
+                profileViews: 142
+            }
+        });
+    } catch (error) {
+        console.error("Get Dashboard Stats Error:", error);
+        return res.status(500).json({ success: false, message: "Server error retrieving dashboard stats" });
     }
 };

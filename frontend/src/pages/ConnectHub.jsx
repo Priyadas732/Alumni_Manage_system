@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { requestAPI } from '../api';
+import UserAvatar from '../components/UserAvatar';
 
 export default function ConnectHub() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -45,71 +46,36 @@ export default function ConnectHub() {
   };
 
   const getUserDisplayDetails = (user) => {
-    const name = (user.name || '').toLowerCase();
     const role = user.role;
     
-    let badge = role === 'STUDENT' ? 'STUDENT' : 'ALUMNI';
-    let branchText = user.branch || (role === 'STUDENT' ? 'Computer Science' : 'Alumni');
-    let line1 = '';
-    let line1Icon = 'business_center'; // default briefcase
-    let line2 = user.location || 'San Francisco, CA';
-    let line2Icon = 'location_on'; // default pin
-    let isVerified = false;
-    let skills = ['Leadership', 'Speaking', 'Strategy'];
+    const badge = role === 'STUDENT' ? 'STUDENT' : (user.openToMentoring ? 'MENTOR' : 'ALUMNI');
+    const branchText = user.branch || (role === 'STUDENT' ? 'Engineering' : 'Alumni');
+    const isVerified = user.openToMentoring || user.openToReferrals || false;
 
-    if (name.includes('priya')) {
-      badge = 'STUDENT';
-      branchText = 'UX Design';
-      line1 = 'Graduate Student at Stanford';
+    let line1 = '';
+    let line1Icon = 'business_center';
+    let line2 = user.location || '';
+    let line2Icon = 'location_on';
+    let skills = ['Leadership', 'Communication', 'Strategy'];
+
+    if (role === 'STUDENT') {
+      line1 = `Student${user.college ? ' at ' + user.college : ''}`;
       line1Icon = 'school';
-      line2 = 'San Francisco, CA';
-      skills = ['Figma', 'User Research', 'Prototyping'];
-    } else if (name.includes('anjan')) {
-      badge = 'STUDENT';
-      branchText = 'CS & Math';
-      line1 = 'Incoming Intern at Google';
-      line1Icon = 'business_center';
-      line2 = 'New York, NY';
-      skills = ['Python', 'React', 'Go'];
-    } else if (name.includes('lucky')) {
-      badge = 'ALUMNI';
-      branchText = 'Product Mgmt';
-      line1 = 'Director at Meta';
-      line1Icon = 'business_center';
-      line2 = 'Menlo Park, CA';
-      skills = ['Strategy', 'Scale', 'Leadership'];
-    } else if (name.includes('test')) {
-      badge = 'MENTOR';
-      branchText = 'Alumni';
-      line1 = 'Software Engineer at Google';
-      line1Icon = 'business_center';
-      line2 = 'UCLA Class of 2018';
-      line2Icon = 'school';
-      isVerified = true;
-      skills = ['Cloud Architecture', 'Java', 'Mentoring'];
     } else {
-      // General fallback based on DB values
-      if (role === 'STUDENT') {
-        badge = 'STUDENT';
-        branchText = user.branch || 'Engineering';
-        line1 = `Student at ${user.college || 'NIT Silchar'}`;
-        line1Icon = 'school';
-        line2 = user.location || 'San Francisco, CA';
-      } else {
-        badge = user.openToMentoring ? 'MENTOR' : 'ALUMNI';
-        branchText = user.branch || 'Alumni';
-        line1 = `${user.jobTitle || 'Software Engineer'} at ${user.company || 'Google'}`;
-        line1Icon = 'business_center';
-        line2 = user.location || 'New York, NY';
-      }
-      
-      // Dynamic fallback skills
-      const branchLower = branchText.toLowerCase();
-      if (branchLower.includes('computer') || branchLower.includes('software') || branchLower.includes('it')) {
-        skills = ['React', 'Node.js', 'SQL'];
-      } else if (branchLower.includes('design') || branchLower.includes('art')) {
-        skills = ['Figma', 'UI/UX', 'Research'];
-      }
+      line1 = [user.jobTitle, user.company].filter(Boolean).join(' at ') || 'Professional';
+      line1Icon = 'business_center';
+    }
+
+    // Derive skills from branch
+    const branchLower = branchText.toLowerCase();
+    if (branchLower.includes('computer') || branchLower.includes('software') || branchLower.includes('cs') || branchLower.includes('it') || branchLower.includes('tech')) {
+      skills = ['React', 'Node.js', 'SQL', 'Cloud'];
+    } else if (branchLower.includes('design') || branchLower.includes('ux') || branchLower.includes('art')) {
+      skills = ['Figma', 'UI/UX', 'Research'];
+    } else if (branchLower.includes('finance') || branchLower.includes('business') || branchLower.includes('mba')) {
+      skills = ['Finance', 'Analytics', 'Strategy'];
+    } else if (branchLower.includes('mechanical') || branchLower.includes('civil') || branchLower.includes('electrical')) {
+      skills = ['CAD', 'Systems', 'Analysis'];
     }
 
     return { badge, branchText, line1, line1Icon, line2, line2Icon, isVerified, skills };
@@ -118,19 +84,26 @@ export default function ConnectHub() {
   const filteredAlumni = alumni.filter(user => {
     if (referralsOnly && !user.openToReferrals) return false;
     
-    // Industry filter (Tech)
+    // Industry filter — filter by branch or job title
     if (selectedIndustry === 'Tech') {
       const branchLower = (user.branch || '').toLowerCase();
-      const isTech = branchLower.includes('computer') || branchLower.includes('software') || branchLower.includes('it') || branchLower.includes('technology') || branchLower.includes('cs') || branchLower.includes('ux') || branchLower.includes('design') || (user.name && user.name.toLowerCase().includes('priya')) || (user.name && user.name.toLowerCase().includes('anjan')) || (user.name && user.name.toLowerCase().includes('lucky')) || (user.name && user.name.toLowerCase().includes('test'));
+      const titleLower = (user.jobTitle || '').toLowerCase();
+      const isTech = branchLower.includes('computer') || branchLower.includes('software') ||
+        branchLower.includes('it') || branchLower.includes('technology') ||
+        branchLower.includes('cs') || branchLower.includes('ux') ||
+        branchLower.includes('design') || titleLower.includes('engineer') ||
+        titleLower.includes('developer') || titleLower.includes('product') ||
+        titleLower.includes('data');
       if (!isTech) return false;
     }
     
-    // Role filter (Software Engineer)
+    // Role filter
     if (selectedRole === 'Software Engineer') {
       const titleLower = (user.jobTitle || '').toLowerCase();
       const branchLower = (user.branch || '').toLowerCase();
-      const nameLower = (user.name || '').toLowerCase();
-      const isDev = titleLower.includes('engineer') || titleLower.includes('developer') || titleLower.includes('architect') || branchLower.includes('cs') || nameLower.includes('anjan') || nameLower.includes('test') || nameLower.includes('lucky') || nameLower.includes('priya');
+      const isDev = titleLower.includes('engineer') || titleLower.includes('developer') ||
+        titleLower.includes('architect') || branchLower.includes('computer') ||
+        branchLower.includes('software') || branchLower.includes('cs');
       if (!isDev) return false;
     }
 
@@ -228,13 +201,7 @@ export default function ConnectHub() {
                   {/* Top Header Card Info */}
                   <div className="flex justify-between items-start w-full">
                     <Link to={`/directory/${user.id}`} className="flex gap-4 items-center flex-1 cursor-pointer min-w-0">
-                      <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 border border-slate-200/50 flex items-center justify-center font-bold text-slate-600 shrink-0">
-                        {user.avatarUrl ? (
-                          <img alt={user.name} className="w-full h-full object-cover" src={user.avatarUrl}/>
-                        ) : (
-                          user.name?.charAt(0) || 'U'
-                        )}
-                      </div>
+                      <UserAvatar user={user} className="w-12 h-12" />
                       <div className="min-w-0">
                         <div className="flex items-center gap-1">
                           <h3 className="text-base font-bold text-[#0f2942] truncate group-hover:text-[#3b82f6] transition-colors">{user.name}</h3>

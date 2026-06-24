@@ -20,15 +20,30 @@ export const createPost = async (req, res) => {
             },
             include: {
                 author: {
-                    select: { id: true, name: true, avatarUrl: true, company: true, role: true }
+                    include: {
+                        alumniProfile: {
+                            select: { company: true }
+                        }
+                    }
                 }
             }
         });
 
+        const formattedPost = {
+            ...post,
+            author: post.author ? {
+                id: post.author.id,
+                name: post.author.name,
+                avatarUrl: post.author.avatarUrl,
+                role: post.author.role,
+                company: post.author.alumniProfile?.company || null
+            } : null
+        };
+
         return res.status(201).json({
             success: true,
             message: "Post created successfully",
-            post
+            post: formattedPost
         });
     } catch (error) {
         console.error("Create Post Error:", error);
@@ -43,7 +58,11 @@ export const getPosts = async (req, res) => {
             orderBy: { createdAt: 'desc' },
             include: {
                 author: {
-                    select: { id: true, name: true, avatarUrl: true, company: true, role: true }
+                    include: {
+                        alumniProfile: {
+                            select: { company: true }
+                        }
+                    }
                 },
                 likes: {
                     select: { userId: true } // Used to check if the current user liked it and count likes
@@ -59,16 +78,25 @@ export const getPosts = async (req, res) => {
             }
         });
 
-        // Format posts to include like counts and likedByMe flag
+        // Format posts to include like counts, likedByMe flag, and author company
         const currentUserId = req.user.id;
         const formattedPosts = posts.map(post => {
             const likeCount = post.likes.length;
             const likedByMe = post.likes.some(like => like.userId === currentUserId);
             
+            const author = post.author ? {
+                id: post.author.id,
+                name: post.author.name,
+                avatarUrl: post.author.avatarUrl,
+                role: post.author.role,
+                company: post.author.alumniProfile?.company || null
+            } : null;
+
             // Remove the raw likes array from payload for efficiency
-            const { likes, ...postDetails } = post;
+            const { likes, author: _, ...postDetails } = post;
             return {
                 ...postDetails,
+                author,
                 likeCount,
                 likedByMe
             };

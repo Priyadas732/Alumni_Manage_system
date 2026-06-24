@@ -132,6 +132,22 @@ export const sendMessage = async (req, res) => {
             }
         });
 
+        // Fetch participants in this conversation other than the sender
+        const participants = await prisma.participant.findMany({
+            where: {
+                conversationId,
+                userId: { not: senderId }
+            }
+        });
+
+        // Emit message to other participants via Socket.io
+        const io = req.app.get('io');
+        if (io) {
+            participants.forEach(p => {
+                io.to(p.userId).emit('message_received', message);
+            });
+        }
+
         return res.status(201).json({ success: true, message });
     } catch (error) {
         console.error("Send Message Error:", error);

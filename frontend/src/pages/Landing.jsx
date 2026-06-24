@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import UserAvatar from '../components/UserAvatar';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -26,7 +27,6 @@ export default function Landing() {
   };
 
   const userName = user?.name || 'User';
-  const userAvatar = user?.avatarUrl || user?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80";
 
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
@@ -58,8 +58,8 @@ export default function Landing() {
               >
                 Log Out
               </button>
-              <Link to="/profile" className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant hover:ring-2 hover:ring-primary/50 transition-all shrink-0">
-                <img className="w-full h-full object-cover" alt="User Profile Avatar" src={userAvatar} />
+              <Link to="/profile">
+                <UserAvatar user={user} className="w-10 h-10 border border-outline-variant hover:ring-2 hover:ring-primary/50 transition-all shrink-0" />
               </Link>
             </div>
           ) : (

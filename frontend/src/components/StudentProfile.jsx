@@ -9,7 +9,7 @@ export default function StudentProfile({ profile, onSave }) {
     linkedin: profile.linkedin || '',
     facebook: profile.facebook || '',
     leetcode: profile.leetcode || '',
-    avatar: profile.avatarUrl || profile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+    avatar: profile.avatarUrl || profile.avatar || '',
     resumeName: profile.resumeName || null
   });
 
@@ -21,7 +21,7 @@ export default function StudentProfile({ profile, onSave }) {
       linkedin: profile.linkedin || '',
       facebook: profile.facebook || '',
       leetcode: profile.leetcode || '',
-      avatar: profile.avatarUrl || profile.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      avatar: profile.avatarUrl || profile.avatar || '',
       resumeName: profile.resumeName || null
     });
   }, [profile]);
@@ -80,11 +80,17 @@ export default function StudentProfile({ profile, onSave }) {
               isEditMode ? 'cursor-pointer hover:brightness-90 transition-all' : ''
             }`}
           >
-            <img 
-              alt="Profile Avatar" 
-              className="w-full h-full object-cover" 
-              src={formData.avatar}
-            />
+            {formData.avatar ? (
+              <img 
+                alt="Profile Avatar" 
+                className="w-full h-full object-cover" 
+                src={formData.avatar}
+              />
+            ) : (
+              <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-3xl select-none">
+                {(formData.name || 'S').charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
           {isEditMode && (
             <div 

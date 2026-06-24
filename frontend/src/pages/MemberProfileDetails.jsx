@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { userAPI, chatAPI, requestAPI } from '../api';
+import UserAvatar from '../components/UserAvatar';
 
 export default function MemberProfileDetails() {
   const { id } = useParams();
@@ -128,14 +129,7 @@ export default function MemberProfileDetails() {
 
             {/* Profile Info Overlay Row */}
             <div className="px-lg pb-lg pt-24 relative flex flex-col md:flex-row justify-between items-start md:items-end gap-md">
-              {/* Profile Avatar overlapping banner */}
-              <div className="absolute -top-16 left-lg w-28 h-28 rounded-2xl border-4 border-white shadow-lg overflow-hidden bg-slate-100 shrink-0">
-                <img 
-                  alt={member.name}
-                  className="w-full h-full object-cover" 
-                  src={member.avatarUrl || member.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'} 
-                />
-              </div>
+              <UserAvatar user={member} className="absolute -top-16 left-lg w-28 h-28 border-4 border-white shadow-lg" rounded="rounded-2xl" />
 
               {/* Name and headline */}
               <div className="md:pl-32 pt-2 md:pt-0">
@@ -212,37 +206,40 @@ export default function MemberProfileDetails() {
                 <h2 className="text-lg font-bold text-[#0f2942]">Experience</h2>
                 
                 <div className="space-y-lg relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-100">
-                  {/* Job item 1 */}
-                  <div className="flex gap-md items-start relative pl-8">
-                    <div className="absolute left-[7px] top-[6px] w-[20px] h-[20px] rounded-full bg-blue-100 border-4 border-white flex items-center justify-center z-10 shrink-0"></div>
-                    <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 shrink-0">
-                      <span className="material-symbols-outlined text-md">business_center</span>
+                  {isAlumni && member.jobTitle ? (
+                    <div className="flex gap-md items-start relative pl-8">
+                      <div className="absolute left-[7px] top-[6px] w-[20px] h-[20px] rounded-full bg-blue-100 border-4 border-white flex items-center justify-center z-10 shrink-0"></div>
+                      <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                        <span className="material-symbols-outlined text-md">business_center</span>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-[#0f2942]">{member.jobTitle}</h3>
+                        <p className="text-xs text-[#0a58ca] font-bold">{member.company || 'Not specified'}</p>
+                        {member.gradYear && (
+                          <p className="text-[10px] text-slate-400 font-bold uppercase mt-[2px]">Since {member.gradYear}</p>
+                        )}
+                        {member.bio && (
+                          <p className="text-slate-500 text-xs mt-xs leading-relaxed">{member.bio}</p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-[#0f2942]">{member.jobTitle || (isAlumni ? 'Senior Systems Architect' : 'Intern')}</h3>
-                      <p className="text-xs text-[#0a58ca] font-bold">{member.company || (isAlumni ? 'Quantum Dynamics' : 'Skyline Tech Solutions')}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-[2px]">Jan 2021 — Present • 3 yrs 4 mos</p>
-                      <p className="text-slate-500 text-xs mt-xs leading-relaxed">
-                        Leading the infrastructure migration to a distributed serverless architecture, improving latency by 45%.
-                      </p>
+                  ) : !isAlumni && member.college ? (
+                    <div className="flex gap-md items-start relative pl-8">
+                      <div className="absolute left-[7px] top-[6px] w-[20px] h-[20px] rounded-full bg-blue-100 border-4 border-white flex items-center justify-center z-10 shrink-0"></div>
+                      <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                        <span className="material-symbols-outlined text-md">school</span>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-[#0f2942]">Student</h3>
+                        <p className="text-xs text-[#0a58ca] font-bold">{member.college}</p>
+                        {member.branch && (
+                          <p className="text-[10px] text-slate-400 font-bold uppercase mt-[2px]">{member.branch}</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Job item 2 */}
-                  <div className="flex gap-md items-start relative pl-8">
-                    <div className="absolute left-[7px] top-[6px] w-[20px] h-[20px] rounded-full bg-slate-300 border-4 border-white flex items-center justify-center z-10 shrink-0"></div>
-                    <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 shrink-0">
-                      <span className="material-symbols-outlined text-md">business_center</span>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-[#0f2942]">{isAlumni ? 'Full-Stack Engineer' : 'Junior Project Intern'}</h3>
-                      <p className="text-xs text-[#0a58ca] font-bold">{isAlumni ? 'CloudPulse Systems' : 'TechCorp Inc.'}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase mt-[2px]">June 2018 — Dec 2020 • 2 yrs 7 mos</p>
-                      <p className="text-slate-500 text-xs mt-xs leading-relaxed">
-                        Developed core API services and maintained critical databases for a SaaS platform serving 500k monthly users.
-                      </p>
-                    </div>
-                  </div>
+                  ) : (
+                    <p className="text-slate-400 text-sm">No experience details available.</p>
+                  )}
                 </div>
               </div>
 
@@ -310,20 +307,32 @@ export default function MemberProfileDetails() {
                 </div>
               </div>
 
-              {/* Mutual Connections Panel */}
+              {/* Quick Info Panel */}
               <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-sm p-lg space-y-md">
-                <h2 className="text-md font-extrabold text-[#0f2942] uppercase tracking-wide border-b border-slate-100 pb-sm">Mutual Connections</h2>
+                <h2 className="text-md font-extrabold text-[#0f2942] uppercase tracking-wide border-b border-slate-100 pb-sm">Quick Info</h2>
                 
-                <div className="space-y-sm text-xs">
-                  <div className="flex items-center -space-x-2">
-                    <img className="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80" alt="avatar" />
-                    <img className="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="avatar" />
-                    <img className="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="avatar" />
-                    <div className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 text-[#718096] flex items-center justify-center font-bold text-[10px] shrink-0">+12</div>
-                  </div>
-                  <p className="text-slate-500 leading-normal">
-                    Sarah Jenkins, Michael Chen, and 12 others you know.
-                  </p>
+                <div className="space-y-sm text-xs text-slate-600">
+                  {member.email && (
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] text-slate-400">mail</span>
+                      <span className="font-semibold truncate">{member.email}</span>
+                    </div>
+                  )}
+                  {member.gradYear && (
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] text-slate-400">event</span>
+                      <span className="font-semibold">Class of {member.gradYear}</span>
+                    </div>
+                  )}
+                  {member.location && (
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[16px] text-slate-400">location_on</span>
+                      <span className="font-semibold">{member.location}</span>
+                    </div>
+                  )}
+                  {!member.email && !member.gradYear && !member.location && (
+                    <p className="text-slate-400">No additional info available.</p>
+                  )}
                 </div>
               </div>
 

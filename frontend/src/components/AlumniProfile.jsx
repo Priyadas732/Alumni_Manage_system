@@ -29,7 +29,7 @@ export default function AlumniProfile({ profile, onSave }) {
     facebook: profile.resumeUrl || profile.facebook || '', // Second link (GitHub/Portfolio)
     openToMentoring: profile.openToMentoring ?? true,
     openToReferrals: profile.openToReferrals ?? false,
-    avatar: profile.avatarUrl || profile.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
+    avatar: profile.avatarUrl || profile.avatar || ''
   });
 
   // Track original data to support Discard action
@@ -44,7 +44,7 @@ export default function AlumniProfile({ profile, onSave }) {
       facebook: profile.resumeUrl || profile.facebook || '',
       openToMentoring: profile.openToMentoring ?? true,
       openToReferrals: profile.openToReferrals ?? false,
-      avatar: profile.avatarUrl || profile.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
+      avatar: profile.avatarUrl || profile.avatar || ''
     });
   }, [profile]);
 
@@ -68,7 +68,7 @@ export default function AlumniProfile({ profile, onSave }) {
       facebook: profile.resumeUrl || profile.facebook || '',
       openToMentoring: profile.openToMentoring ?? true,
       openToReferrals: profile.openToReferrals ?? false,
-      avatar: profile.avatarUrl || profile.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
+      avatar: profile.avatarUrl || profile.avatar || ''
     });
   };
 
@@ -110,11 +110,17 @@ export default function AlumniProfile({ profile, onSave }) {
               onClick={handleAvatarClick}
               className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#0a58ca]/20 cursor-pointer hover:brightness-90 transition-all relative"
             >
-              <img 
-                alt="Profile Avatar" 
-                className="w-full h-full object-cover" 
-                src={formData.avatar}
-              />
+              {formData.avatar ? (
+                <img 
+                  alt="Profile Avatar" 
+                  className="w-full h-full object-cover" 
+                  src={formData.avatar}
+                />
+              ) : (
+                <div className="w-full h-full bg-[#0a58ca]/10 text-[#0a58ca] flex items-center justify-center font-bold text-3xl select-none">
+                  {(formData.name || 'A').charAt(0).toUpperCase()}
+                </div>
+              )}
               <div 
                 className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
               >
