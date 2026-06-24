@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: alumni-manage-backend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm run render-build
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false  # Must be set manually in the Render dashboard
+      - key: JWT_SECRET
+        generateValue: true  # Render will auto-generate a random secret
+      - key: ALLOWED_ORIGIN
+        sync: false  # Set to your frontend URL after deployment

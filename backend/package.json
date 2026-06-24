@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "build": "prisma generate"
+    "build": "npx prisma generate",
+    "render-build": "npm install && npx prisma generate && cd ../frontend && npm install && npm run build"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -17,10 +18,13 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.21.0",
+    "prisma": "^7.8.0",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14",
-    "prisma": "^7.8.0"
+    "nodemon": "^3.1.14"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
